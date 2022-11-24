@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Optional;
 
 public class UserRepository {
 
@@ -12,6 +13,30 @@ public class UserRepository {
                             "postgres", "root");
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public Optional<User> getUserByLogin(String login) {
+        try {
+            PreparedStatement statement = connection
+                    .prepareStatement("select * from parking_user where login = ?");
+            statement.setString(1, login);
+            ResultSet resultSet = statement.executeQuery();
+            resultSet.next();
+            return Optional.of(User.builder()
+                    .id(resultSet.getLong("id"))
+                    .login(resultSet.getString("login"))
+                    .lastName(resultSet.getString("last_name"))
+                    .middleName(resultSet.getString("middle_name"))
+                    .firstName(resultSet.getString("first_name"))
+                    .password(resultSet.getString("password"))
+                    .phoneNumber(resultSet.getString("phone_number"))
+                    .cardNumber(resultSet.getString("card_number"))
+                    .role(Role.valueOf(resultSet.getString("role").toUpperCase()))
+                    .build());
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return Optional.empty();
         }
     }
 
